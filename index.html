@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Akbar Khra</title>
+<meta property="og:title" content="Chkoun akbar khra f server?">
+<meta property="og:description" content="Sawet. L'votes kaytjem3o mn kolchi, o l'klassman kayt7rrek live.">
+<meta name="theme-color" content="#15102b">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Rubik:wght@400;500;700&display=swap">
+<style>
+/* Layout: marquee strip, shouting question, top-3 podium (sorted live), then a fixed-order list of 15 voters rows, then a weighted picker. Committed dark single look. */
+:root {
+  --bg: #15102b;
+  --panel: #21194a;
+  --ink: #fff6e0;
+  --muted: #b9b0e0;
+  --sun: #ffc233;
+  --pink: #ff4d8d;
+  --sky: #4de1ff;
+  --font-display: "Bowlby One", "Arial Black", Impact, sans-serif;
+  --font-body: "Rubik", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: #15102b; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-block: 2rem 4rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.strip {
+  background: var(--sun);
+  color: #2a1a00;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  transform: rotate(-1.2deg);
+  margin: 0.5rem -2rem 0;
+  padding: 0.5rem 0;
+}
+.strip span { display: inline-block; animation: slide 26s linear infinite; padding-left: 100%; }
+@keyframes slide { to { transform: translateX(-100%); } }
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 9vw, 5.4rem);
+  line-height: 0.98;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin: 2.5rem 0 1rem;
+}
+h1 em { font-style: normal; color: var(--ink); background: var(--pink); padding: 0.02em 0.25em; display: inline-block; transform: rotate(-1.5deg); }
+.lead { max-width: 54ch; color: var(--muted); font-size: 1.1rem; margin: 0 0 1.5rem; }
+#status { min-height: 1.5em; color: var(--sky); font-size: 0.9rem; margin: 0 0 1rem; }
+
+h2.sec { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; text-transform: uppercase; margin: 2rem 0 0.75rem; }
+
+.podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; }
+.pod {
+  border: 3px solid var(--ink); border-radius: 1.2rem; padding: 1rem 1.25rem; min-width: 0;
+  background: var(--panel); box-shadow: 6px 6px 0 var(--c);
+}
+.pod:nth-child(1) { --c: #ffc233; background: #2f2468; }
+.pod:nth-child(2) { --c: #ff4d8d; }
+.pod:nth-child(3) { --c: #4de1ff; }
+.pod .t { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.pod .nm { font-family: var(--font-display); font-size: clamp(1.6rem, 6vw, 2.4rem); text-transform: uppercase; color: var(--c); overflow-wrap: anywhere; line-height: 1.05; }
+.pod .ct { color: var(--muted); font-variant-numeric: tabular-nums; }
+.pod .ct b { color: var(--ink); font-size: 1.3rem; }
+
+.list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); gap: 0.75rem 1rem; padding: 0; margin: 0; list-style: none; }
+.row {
+  display: grid; grid-template-columns: 2.4rem minmax(0, 1fr) auto; gap: 0.25rem 0.75rem; align-items: center;
+  background: var(--panel); border: 2px solid #4a3d94; border-radius: 1rem; padding: 0.7rem 0.9rem;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.row.pick { animation: pop 0.45s ease infinite alternate; border-color: var(--sun); background: #3a2a7a; }
+@keyframes pop { to { transform: scale(1.025); } }
+.row .pl { font-family: var(--font-display); color: var(--c); font-size: 1.1rem; font-variant-numeric: tabular-nums; text-align: center; }
+.row .nm { font-weight: 700; font-size: 1.15rem; overflow-wrap: anywhere; }
+.row .nm small { font-weight: 400; color: var(--muted); font-size: 0.8rem; margin-left: 0.4rem; }
+.row .bar { grid-column: 2; height: 12px; border-radius: 999px; background: #0e0a21; border: 2px solid #4a3d94; overflow: hidden; }
+.row .bar i { display: block; height: 100%; width: 0; background: var(--c); transition: width 0.6s cubic-bezier(.2,.9,.3,1.2); }
+.row .ct { font-family: var(--font-display); font-size: 1.4rem; color: var(--ink); font-variant-numeric: tabular-nums; text-align: right; }
+.row button { grid-column: 3; grid-row: 2; }
+.row .ct { grid-column: 3; grid-row: 1; }
+
+button {
+  font: inherit; font-weight: 700; cursor: pointer; border: 0; border-radius: 999px;
+  padding: 0.7rem 1.3rem; background: var(--sun); color: #2a1a00; box-shadow: 0 4px 0 #b57f00;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+button:hover { transform: translateY(-1px); }
+button:active { transform: translateY(3px); box-shadow: 0 1px 0 #b57f00; }
+button:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; }
+.row button { font-size: 0.85rem; padding: 0.35rem 0.85rem; }
+button.alt { background: var(--pink); color: #fff; box-shadow: 0 4px 0 #a21f56; }
+button.alt:active { box-shadow: 0 1px 0 #a21f56; }
+
+.verdict { margin-top: 2.5rem; padding: 1.5rem; border: 3px dashed var(--sky); border-radius: 1.2rem; display: grid; gap: 1rem; justify-items: start; }
+.verdict h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(1.4rem, 5vw, 2.2rem); text-transform: uppercase; text-wrap: balance; }
+#result { font-size: 1.15rem; min-height: 3.2em; margin: 0; }
+#result em { color: var(--sun); font-style: normal; font-weight: 700; }
+footer { margin-top: 3rem; color: var(--muted); font-size: 0.85rem; }
+@media (prefers-reduced-motion: reduce) {
+  .strip span, .row.pick { animation: none; }
+  .row .bar i { transition: none; }
+}
+</style>
+</head>
+<body>
+<div class="strip" aria-hidden="true"><span>Chkoun akbar khra f server? * Sawet daba * Chkoun akbar khra f server? * Sawet daba * Chkoun akbar khra f server? * Sawet daba *</span></div>
+
+<main class="wrap">
+  <h1>Chkoun <em>akbar khra</em> f server?</h1>
+  <p class="lead">15 mrechhin, wa7ed ghadi yb9a f l'ras. Sawet 3la li bghiti (kol mra +1), l'natija kat t7seb m3a kolchi o kat t7rrek live.</p>
+  <p id="status" role="status"></p>
+
+  <h2 class="sec">Lpodium</h2>
+  <section class="podium" id="podium" aria-live="polite"></section>
+
+  <h2 class="sec">Kolhom</h2>
+  <ol class="list" id="list"></ol>
+
+  <section class="verdict">
+    <h3>Dour l'3ajla</h3>
+    <button class="alt" id="spin" type="button">Chkoun l'khra lyoum?</button>
+    <p id="result" aria-live="polite">Kol vote kayzid l'7dd dyal l'khra.</p>
+  </section>
+
+  <footer>Mseft b l'7ob l'sa7bi. Ghir dhek, kolchi mzyan.</footer>
+</main>
+
+<script>
+(function () {
+  var names = ["Ninja", "Mina", "Ziko", "Itacha", "Mitrox", "Atr", "Aura", "Aurlia", "Old", "Swight", "Makiller", "Bimo", "Marven", "Salma", "Malak"];
+  var colors = ["#ffc233", "#ff4d8d", "#4de1ff"];
+  var crew = names.map(function (n, i) { return { key: n.toLowerCase(), name: n, c: colors[i % 3] }; });
+  var KEYS = crew.map(function (p) { return p.key; });
+  var titles = ["Sultan dyal l'khra", "Wazir dyal l'khra", "Hajeb dyal l'khra"];
+
+  // server = totals from the shared database; inflight = votes sent but not confirmed; mine = this browser's own votes.
+  var server = {}, inflight = {}, mine = {};
+  KEYS.forEach(function (k) { server[k] = 0; inflight[k] = 0; mine[k] = 0; });
+  try {
+    var saved = JSON.parse(localStorage.getItem("akbar-khra-mine") || "{}");
+    KEYS.forEach(function (k) { mine[k] = Number(saved[k]) || 0; });
+  } catch (e) {}
+  function saveMine() { try { localStorage.setItem("akbar-khra-mine", JSON.stringify(mine)); } catch (e) {} }
+
+  var statusEl = document.getElementById("status");
+  function setStatus(m) { statusEl.textContent = m || ""; }
+
+  var list = document.getElementById("list");
+  var rows = crew.map(function (p) {
+    var li = document.createElement("li");
+    li.className = "row";
+    li.style.setProperty("--c", p.c);
+    li.innerHTML =
+      '<span class="pl">-</span>' +
+      '<span class="nm"><span class="n"></span><small></small></span>' +
+      '<span class="ct">0</span>' +
+      '<span class="bar"><i></i></span>' +
+      '<button type="button">+1 khra</button>';
+    li.querySelector(".n").textContent = p.name;
+    li.querySelector("button").setAttribute("aria-label", "Zid khra l " + p.name);
+    li.querySelector("button").addEventListener("click", function () { bump(p.key); });
+    list.appendChild(li);
+    return {
+      el: li,
+      pl: li.querySelector(".pl"),
+      ct: li.querySelector(".ct"),
+      bar: li.querySelector("i"),
+      mine: li.querySelector("small")
+    };
+  });
+
+  var podium = document.getElementById("podium");
+  var pods = [0, 1, 2].map(function (i) {
+    var d = document.createElement("div");
+    d.className = "pod";
+    d.innerHTML = '<div class="t"></div><div class="nm">?</div><div class="ct"></div>';
+    d.querySelector(".t").textContent = titles[i];
+    podium.appendChild(d);
+    return { nm: d.querySelector(".nm"), ct: d.querySelector(".ct") };
+  });
+
+  function totals() {
+    var t = {};
+    KEYS.forEach(function (k) { t[k] = server[k] + inflight[k]; });
+    return t;
+  }
+
+  function render() {
+    var t = totals();
+    var max = 0;
+    KEYS.forEach(function (k) { if (t[k] > max) max = t[k]; });
+    crew.forEach(function (p, i) {
+      var v = t[p.key], r = rows[i];
+      r.ct.textContent = v;
+      r.bar.style.width = max > 0 ? Math.round((v / max) * 100) + "%" : "0%";
+      var better = 0;
+      KEYS.forEach(function (k) { if (t[k] > v) better++; });
+      r.pl.textContent = max > 0 ? "#" + (better + 1) : "-";
+      r.mine.textContent = mine[p.key] ? "(nta: " + mine[p.key] + ")" : "";
+    });
+    var sorted = crew.slice().sort(function (a, b) { return t[b.key] - t[a.key]; });
+    pods.forEach(function (p, i) {
+      var c = sorted[i];
+      if (max > 0 && t[c.key] > 0) {
+        p.nm.textContent = c.name;
+        p.ct.innerHTML = "<b></b> votes";
+        p.ct.querySelector("b").textContent = t[c.key];
+      } else {
+        p.nm.textContent = "?";
+        p.ct.textContent = "Mazal ma tsawtat 7ta wa7ed.";
+      }
+    });
+  }
+
+  function apply(counts) {
+    KEYS.forEach(function (k) { server[k] = Number(counts && counts[k]) || 0; });
+  }
+
+  function refresh() {
+    fetch("/api/votes", { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("bad"); return r.json(); })
+      .then(function (d) { apply(d.counts); setStatus(""); render(); })
+      .catch(function () { setStatus("Ma9dernach nswlo l'server. Kan3awed n7awel."); });
+  }
+
+  function bump(k) {
+    mine[k]++;
+    saveMine();
+    inflight[k]++;
+    render();
+    fetch("/api/votes", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ key: k })
+    })
+      .then(function (r) { if (!r.ok) throw new Error("bad"); return r.json(); })
+      .then(function (d) { inflight[k]--; apply(d.counts); setStatus(""); render(); })
+      .catch(function () {
+        inflight[k]--;
+        mine[k]--;
+        saveMine();
+        setStatus("Ma t7ssebch l'vote, 3awed 7awel.");
+        render();
+      });
+  }
+
+  // Weighted picker: more votes, more chance. Ends exactly on the pick.
+  var excuses = [
+    "nsa l'mftah dyal dar.", "dkhel l'whatsapp, chaf 40 messages, o ma jawbch.", "gal \"jay\" o ma jach.",
+    "tlb l'btata o mkhlless.", "chaf l'film kamel o ma fhem walo.", "tssna l'kol 3la 7ssab 7ayatou."
+  ];
+  var spinning = false, res = document.getElementById("result");
+  document.getElementById("spin").addEventListener("click", function () {
+    if (spinning) return;
+    spinning = true;
+    var t = totals(), sum = 0, w = KEYS.map(function (k) { var x = t[k] + 1; sum += x; return x; });
+    var r = Math.random() * sum, pick = 0;
+    for (var i = 0; i < w.length; i++) { r -= w[i]; if (r < 0) { pick = i; break; } }
+    var n = 30 + pick, step = 0, last = -1;
+    var iv = setInterval(function () {
+      if (last >= 0) rows[last].el.classList.remove("pick");
+      last = step % rows.length;
+      rows[last].el.classList.add("pick");
+      if (step >= n) {
+        clearInterval(iv);
+        spinning = false;
+        var ex = excuses[Math.floor(Math.random() * excuses.length)];
+        res.innerHTML = "L'khra dyal lyoum howa <em></em>. 3la 7ssab l'dossier: " + ex;
+        res.querySelector("em").textContent = crew[last].name;
+        rows[last].el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setTimeout(function () { rows[last].el.classList.remove("pick"); }, 2500);
+      }
+      step++;
+    }, 90);
+  });
+
+  render();
+  refresh();
+  setInterval(function () { if (!document.hidden) refresh(); }, 5000);
+})();
+</script>
+</body>
+</html>
